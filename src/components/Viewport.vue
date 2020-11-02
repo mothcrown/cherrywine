@@ -5,41 +5,61 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 
 @Component<Viewport>({
   mounted () {
-    const el = this.$refs.viewport as Element
+    const viewport = this.$refs.viewport as Element
+    this.renderer.setSize(window.innerWidth, window.innerHeight)
+    viewport.appendChild(this.renderer.domElement)
     this.camera = new THREE.PerspectiveCamera(
-      75,
-      el.clientWidth / el.clientHeight,
-      0.1,
-      1000
+      45,
+      viewport.clientWidth / viewport.clientHeight,
+      1,
+      10000
     )
-    this.renderer.setSize(el.clientWidth, el.clientHeight)
-    el.appendChild(this.renderer.domElement)
+    const controls = new OrbitControls(this.camera, this.renderer.domElement)
+    this.camera.position.set(1, 1, 1)
 
-    const geometry = new THREE.BoxGeometry(1, 1, 1)
+    const axesHelper = new THREE.AxesHelper(5)
+    let geometry = new THREE.BoxGeometry(5, 5, 5)
     new THREE.TextureLoader().load(
       '/textures/brickwall.jpg',
       (texture) => {
-        console.log(texture)
-        const material = new THREE.MeshBasicMaterial({ map: texture })
-        // color: 0xa0522d
-        const cube = new THREE.Mesh(geometry, material)
+        const material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.BackSide })
+        new THREE.TextureLoader().load(
+          '/textures/empty.jpg',
+          (empty) => {
+            const material1 = new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, alphaMap: empty })
+            this.scene.add(axesHelper)
+            // color: 0xa0522d
+            const cube = new THREE.Mesh(geometry, [
+              material, material, material, material, material1, material
+            ])
+            this.scene.add(cube)
 
-        this.scene.add(cube)
-        this.camera.position.z = 5
+            geometry = new THREE.BoxGeometry(5, 5, 5)
 
-        const animate = () => {
-          requestAnimationFrame(animate)
+            const cube1 = new THREE.Mesh(geometry, [
+              material, material, material, material, material1, material1
+            ])
+            cube1.position.z += 5
+            this.scene.add(cube1)
 
-          cube.rotation.x += 0.01
-          cube.rotation.y += 0.01
+            const cube2 = new THREE.Mesh(geometry, [
+              material, material, material, material, material, material1
+            ])
+            cube2.position.z += 10
+            this.scene.add(cube2)
 
-          this.renderer.render(this.scene, this.camera)
-        }
-
-        animate()
+            const animate = () => {
+              requestAnimationFrame(animate)
+              controls.update()
+              this.renderer.render(this.scene, this.camera)
+            }
+            animate()
+          }
+        )
       }
     )
   }
@@ -54,6 +74,6 @@ export default class Viewport extends Vue {
 <style scoped>
     .viewport {
         width: 100%;
-        height: 100%;
+        height: 100vh;
     }
 </style>
