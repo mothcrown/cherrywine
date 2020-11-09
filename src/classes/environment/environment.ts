@@ -6,5 +6,6 @@ export interface EnvironmentConstructor {
 export interface Environment {
     type: string
     size: number
+    textures: Array<string>
     generate(): void
 }
