@@ -1,0 +1,12 @@
+{
+    "empty": {
+        "walls": [
+            "/textures/empty.jpg"
+        ]
+    },
+    "dungeon": {
+        "walls": [
+            "/textures/brickwall.jpg"
+        ]
+    }
+}
